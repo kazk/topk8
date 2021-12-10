@@ -1,0 +1,20 @@
+[package]
+name = "topk8"
+version = "0.0.1"
+license = "Apache-2.0"
+description = "Convert private keys to PKCS#8 format in pure Rust"
+keywords = ["pkcs8", "pem"]
+homepage = "https://github.com/kazk/topk8"
+repository = "https://github.com/kazk/topk8"
+readme = "README.md"
+authors = ["kazk <kazk.dev@gmail.com>"]
+edition = "2021"
+
+[dependencies]
+pkcs8 = { version = "0.8.0", features = ["alloc", "pem", "std"] }
+rsa = { version = "0.5.0", features = ["alloc", "pem", "std"] }
+sec1 = { version = "0.2.1", features = ["alloc", "pkcs8", "pem", "std"] }
+thiserror = "1.0.30"
+
+[dev-dependencies]
+indoc = "1.0.3"

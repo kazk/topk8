@@ -54,9 +54,16 @@ pub enum ConvertPkcs1Error {
 ///
 /// Returns `Err` when de/serialization fails. See [`ConvertPkcs1Error`].
 pub fn from_pkcs1_pem(pem: &str) -> Result<String, ConvertPkcs1Error> {
-    use rsa::{pkcs1::FromRsaPrivateKey, pkcs8::ToPrivateKey, RsaPrivateKey};
+    use rsa::{
+        pkcs1::FromRsaPrivateKey,
+        pkcs8::{LineEnding, ToPrivateKey},
+        RsaPrivateKey,
+    };
     let pkey = RsaPrivateKey::from_pkcs1_pem(pem).map_err(ConvertPkcs1Error::Deserialize)?;
-    let pkcs8_pem = pkey.to_pkcs8_pem().map_err(ConvertPkcs1Error::Serialize)?;
+    // TODO Use `LineEnding::default()`? Always use `LF` for now.
+    let pkcs8_pem = pkey
+        .to_pkcs8_pem_with_le(LineEnding::LF)
+        .map_err(ConvertPkcs1Error::Serialize)?;
     let pkcs8_pem: &str = pkcs8_pem.as_ref();
     Ok(pkcs8_pem.to_owned())
 }
@@ -99,7 +106,7 @@ mod tests {
             -----END RSA PRIVATE KEY-----
         "};
         // println!("{}", rsa_pem);
-        // println!("{}", pkcs1_pem(rsa_pem).unwrap());
+        // println!("{}", from_pkcs1_pem(rsa_pem).unwrap());
         let pkcs8_pem = from_pkcs1_pem(rsa_pem).unwrap();
         assert!(pkcs8_pem.starts_with("-----BEGIN PRIVATE KEY-----"));
         assert!(pkcs8_pem.ends_with("-----END PRIVATE KEY-----\n"));
@@ -115,7 +122,7 @@ mod tests {
             -----END EC PRIVATE KEY-----
         "};
         // println!("{}", ec_pem);
-        // println!("{}", sec1_pem(ec_pem).unwrap());
+        // println!("{}", from_sec1_pem(ec_pem).unwrap());
         let pkcs8_pem = from_sec1_pem(ec_pem).unwrap();
         assert!(pkcs8_pem.starts_with("-----BEGIN PRIVATE KEY-----"));
         assert!(pkcs8_pem.ends_with("-----END PRIVATE KEY-----\n"));
